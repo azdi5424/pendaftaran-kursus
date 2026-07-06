@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendaftaran Kursus</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+            width: 100%;
+            max-width: 550px;
+        }
+        h1 {
+            color: #4a00e0;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #333;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.3s;
+        }
+        .btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .error-message {
+            display: none;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📋 Daftar Kursus</h1>
+    <p class="subtitle">Isi borang di bawah. Data akan dihantar terus kepada kami.</p>
+
+    <form id="registrationForm">
+        <div class="form-group">
+            <label for="fullName">Nama Penuh *</label>
+            <input type="text" id="fullName" placeholder="Contoh: Ahmad bin Ali" required>
+            <div class="error" id="nameError">Sila isi nama penuh.</div>
+        </div>
+        <div class="form-group">
+            <label for="email">Emel *</label>
+            <input type="email" id="email" placeholder="contoh@email.com" required>
+            <div class="error" id="emailError">Sila isi emel yang sah.</div>
+        </div>
+        <div class="form-group">
+            <label for="phone">No. Telefon *</label>
+            <input type="tel" id="phone" placeholder="012-3456789" required>
+            <div class="error" id="phoneError">Sila isi nombor telefon.</div>
+        </div>
+        <div class="form-group">
+            <label for="course">Pilih Kursus *</label>
+            <select id="course" required>
+                <option value="">-- Sila Pilih --</option>
+                <option value="Pembangunan Web Asas">Pembangunan Web Asas</option>
+                <option value="Python untuk Pemula">Python untuk Pemula</option>
+                <option value="Reka Bentuk Grafik">Reka Bentuk Grafik</option>
+                <option value="Pemasaran Digital">Pemasaran Digital</option>
+                <option value="Analisis Data">Analisis Data</option>
+            </select>
+            <div class="error" id="courseError">Sila pilih kursus.</div>
+        </div>
+        <div class="form-group">
+            <label for="message">Mesej (jika ada)</label>
+            <textarea id="message" placeholder="Ada sebarang pertanyaan?"></textarea>
+        </div>
+        <button type="submit" class="btn" id="submitBtn">Hantar Pendaftaran</button>
+    </form>
+
+    <div class="success-message" id="successMessage">
+        ✅ Pendaftaran berjaya! Kami akan menghubungi anda melalui emel.
+    </div>
+    <div class="error-message" id="errorMessage">
+        ❌ Ralat berlaku. Sila cuba lagi sebentar.
+    </div>
+</div>
+
+<script>
+    // Endpoint Formspree anda
+    const FORMSPREE_URL = 'https://formspree.io/f/mqevnrld';
+
+    document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Reset mesej
+        document.querySelectorAll('.error').forEach(el => el.style.display = 'none');
+        document.getElementById('successMessage').style.display = 'none';
+        document.getElementById('errorMessage').style.display = 'none';
+
+        // Ambil nilai
+        const fullName = document.getElementById('fullName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const course = document.getElementById('course').value;
+        const message = document.getElementById('message').value.trim();
+
+        // Validasi
+        let valid = true;
+        if (!fullName) {
+            document.getElementById('nameError').style.display = 'block';
+            valid = false;
+        }
+        if (!email || !email.includes('@') || !email.includes('.')) {
+            document.getElementById('emailError').style.display = 'block';
+            valid = false;
+        }
+        if (!phone) {
+            document.getElementById('phoneError').style.display = 'block';
+            valid = false;
+        }
+        if (!course) {
+            document.getElementById('courseError').style.display = 'block';
+            valid = false;
+        }
+        if (!valid) return;
+
+        const formData = {
+            nama: fullName,
+            emel: email,
+            telefon: phone,
+            kursus: course,
+            mesej: message || 'Tiada'
+        };
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sedang menghantar...';
+
+        try {
+            const response = await fetch(FORMSPREE_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('registrationForm').reset();
+            } else {
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        } catch (error) {
+            document.getElementById('errorMessage').style.display = 'block';
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Hantar Pendaftaran';
+        }
+    });
+</script>
+
+</body>
+</html>
